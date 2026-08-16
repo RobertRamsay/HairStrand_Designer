@@ -7,11 +7,9 @@ canvasCheck()
 // -----------------------------------------------------------------------------
 // V1.85 PER-SET COLOUR PERSISTENCE SAFETY FOR MANUAL SAVE / LOAD
 //
-// Autosave/autoload already owns a colour override block.  The legacy S/L key
-// events still contain their own duplicated project IO, though, so keep those
-// old files compatible and add a small authoritative colour block at the end.
-// End Step runs after the keyboard events, so the manual file has been closed
-// before we append/read this block.
+// Per-set colour data belongs to project format 1.85 and later only.
+// Older project files remain valid, but their four legacy colours are treated
+// as global colours and all per-set colour override flags are cleared.
 // -----------------------------------------------------------------------------
 
 // Manual SAVE: append the true globals plus all per-set colour values/flags.
@@ -58,17 +56,16 @@ if keyboard_check_pressed(ord("S")) and fileCustom!="" and file_exists(fileCusto
 		}
 	}
 
-// Manual LOAD: reopen the selected project after the legacy loader has closed
-// it, find the optional colour block, and make it authoritative.  Also accept
-// the V1.84 autosave block if somebody manually opens Autosave.txt.
+// Manual LOAD: the legacy loader has already read mainS by End Step. Only a
+// file whose project header is 1.85+ is permitted to restore per-set colours.
 if keyboard_check_pressed(ord("L")) and fileCustom!="" and file_exists(fileCustom)
 	{
+	var _v185LoadedProjectVersion=real(string_copy(mainS,46,4))
 	var _v185ReadFile=file_text_open_read(fileCustom)
 	var _v185FoundColourBlock=0
-	var _v185BlockHasGlobals=0
 	var _v185Line=""
 	
-	if _v185ReadFile!=-1
+	if _v185ReadFile!=-1 and _v185LoadedProjectVersion>=1.85
 		{
 		while !file_text_eof(_v185ReadFile) and _v185FoundColourBlock==0
 			{
@@ -78,33 +75,15 @@ if keyboard_check_pressed(ord("L")) and fileCustom!="" and file_exists(fileCusto
 			if _v185Line=="V1.85 - Per Set Colour Overrides"
 				{
 				_v185FoundColourBlock=1
-				_v185BlockHasGlobals=1
-				}
-			else if _v185Line=="V1.84 - Per Set Colour Overrides"
-				{
-				_v185FoundColourBlock=1
-				_v185BlockHasGlobals=0
 				}
 			}
 		
 		if _v185FoundColourBlock==1
 			{
-			// V1.85 manual saves carry explicit globals.  The V1.84 autosave
-			// format stores those globals in the normal legacy colour fields.
-			if _v185BlockHasGlobals==1
-				{
-				_v185Line=file_text_read_string(_v185ReadFile); file_text_readln(_v185ReadFile); globalColVarA=real(analiseString(_v185Line))
-				_v185Line=file_text_read_string(_v185ReadFile); file_text_readln(_v185ReadFile); globalColVarB=real(analiseString(_v185Line))
-				_v185Line=file_text_read_string(_v185ReadFile); file_text_readln(_v185ReadFile); globalRootCol=real(analiseString(_v185Line))
-				_v185Line=file_text_read_string(_v185ReadFile); file_text_readln(_v185ReadFile); globalTipCol=real(analiseString(_v185Line))
-				}
-			else
-				{
-				globalColVarA=customColVarA
-				globalColVarB=customColVarB
-				globalRootCol=customRootCol
-				globalTipCol=customTipCol
-				}
+			_v185Line=file_text_read_string(_v185ReadFile); file_text_readln(_v185ReadFile); globalColVarA=real(analiseString(_v185Line))
+			_v185Line=file_text_read_string(_v185ReadFile); file_text_readln(_v185ReadFile); globalColVarB=real(analiseString(_v185Line))
+			_v185Line=file_text_read_string(_v185ReadFile); file_text_readln(_v185ReadFile); globalRootCol=real(analiseString(_v185Line))
+			_v185Line=file_text_read_string(_v185ReadFile); file_text_readln(_v185ReadFile); globalTipCol=real(analiseString(_v185Line))
 			
 			for (var _v185LoadSet=0;_v185LoadSet<11;_v185LoadSet++)
 				{
@@ -118,12 +97,12 @@ if keyboard_check_pressed(ord("L")) and fileCustom!="" and file_exists(fileCusto
 				_v185Line=file_text_read_string(_v185ReadFile); file_text_readln(_v185ReadFile); setTipCol[_v185LoadSet]=real(analiseString(_v185Line))
 				}
 			}
-		
-		file_text_close(_v185ReadFile)
 		}
 	
-	// Older manual project files have no per-set colour block.  Their four
-	// legacy colour values become the globals and every set inherits them.
+	if _v185ReadFile!=-1 file_text_close(_v185ReadFile)
+	
+	// Any file below 1.85, or a 1.85+ file without the colour block, falls back
+	// to the four legacy/global colours and has no per-set colour overrides.
 	if _v185FoundColourBlock==0
 		{
 		globalColVarA=customColVarA
@@ -178,6 +157,10 @@ if keyboard_check_pressed(ord("L")) and fileCustom!="" and file_exists(fileCusto
 	colorOnlyUpdate=1
 	previewCanvasComplete=0
 	forceUpdate=1
+	
+	// The loaded header was needed for compatibility checks above. From this
+	// point onward this running 1.85 build saves projects as the current format.
+	mainS="Hair Strand Designer - Project File - Version1.85.0 - 16thAug2026 (C) Robert Ramsay"
 	}
 
 if bkCol_active==1 
@@ -212,6 +195,33 @@ if bkCol_active==1
 if mouse_check_button_released(mb_left)
 	{
 		doAutoSave()
+		
+		// doAutoSave still writes the legacy header text internally. Promote the
+		// finished autosave to project format 1.85 without disturbing its body.
+		if autosave==1 and canSave and demoMode==0 and file_exists("Autosave.txt")
+			{
+			var _v185AutoTmp="Autosave_v185.tmp"
+			if file_exists(_v185AutoTmp) file_delete(_v185AutoTmp)
+			var _v185AutoIn=file_text_open_read("Autosave.txt")
+			var _v185AutoOut=file_text_open_write(_v185AutoTmp)
+			var _v185AutoFirst=1
+			while !file_text_eof(_v185AutoIn)
+				{
+				var _v185AutoLine=file_text_read_string(_v185AutoIn)
+				file_text_readln(_v185AutoIn)
+				if _v185AutoFirst==1
+					{
+					file_text_write_string(_v185AutoOut,"Hair Strand Designer - Project File - Version1.85.0 - 16thAug2026 (C) Robert Ramsay")
+					_v185AutoFirst=0
+					}
+				else file_text_write_string(_v185AutoOut,_v185AutoLine)
+				file_text_writeln(_v185AutoOut)
+				}
+			file_text_close(_v185AutoIn)
+			file_text_close(_v185AutoOut)
+			file_delete("Autosave.txt")
+			file_rename(_v185AutoTmp,"Autosave.txt")
+			}
 	}
 
 
