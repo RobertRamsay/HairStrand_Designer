@@ -1,6 +1,31 @@
 // Script assets have changed for v2.3.0 see
 // https://help.yoyogames.com/hc/en-us/articles/360005277377 for more information
 function mainCalc(){
+
+// Draw_0's legacy colour-source block runs before mainCalc() and changes the
+// active colour merely from hover position. Restore the authoritative click-only
+// selection here before the rest of the colour UI is drawn or interacted with.
+if variable_instance_exists(id,"colourSelectedSlot")
+    {
+    bkCol_active=0
+    ColA_active=0
+    ColB_active=0
+    RootCol_active=0
+    TipCol_active=0
+    if colourSelectedSlot==0 bkCol_active=1
+    if colourSelectedSlot==1 ColA_active=1
+    if colourSelectedSlot==2 ColB_active=1
+    if colourSelectedSlot==3 RootCol_active=1
+    if colourSelectedSlot==4 TipCol_active=1
+
+    storeColor=colourSelectedStoreColor
+    if colourSelectedSlot==0 newColor=colrBack
+    if colourSelectedSlot==1 newColor=customColVarA
+    if colourSelectedSlot==2 newColor=customColVarB
+    if colourSelectedSlot==3 newColor=customRootCol
+    if colourSelectedSlot==4 newColor=customTipCol
+    }
+
 draw_set_color(c_white)
 
 // MAIN CALCULATION
@@ -117,7 +142,6 @@ or (img==9 and seedUpdate==1))
                     var tA=lerp(scx,scz,cmx)
                     var tB=lerp(scy,scz,cmy)
                     var scA=(clamp((tA+tB),0.15,100)/2)*thicknessBase
-
                     dpthAdd=preRandDepthAdd[b,v]
 
                     // Alpha fade
@@ -257,7 +281,6 @@ if (img==9 and mouse_x<1024 and mouse_check_button(mb_left)) or mouse_check_butt
                         var algFinalX=lerp((lerp(xx,nx,(strandSetWavynessAdj[b]*0.01)*ampFactor)),straggleXX,0.5+((lifeVariant-50)/100))
                         var algTaper=lerp(algFinalX,setXpos,(n/life)*(clamp(strandSetTaperAdj[b],1,strandSetTaperAdj[b])*0.01))
                         finalX=algTaper
-
                         // Colour — this selected set's override values
                         var tempRv=lerp(color_get_red(setColVarA[b]),color_get_red(setColVarB[b]),clamp(dpth+dpthAdd,0,1))
                         var tempGv=lerp(color_get_green(setColVarA[b]),color_get_green(setColVarB[b]),clamp(dpth+dpthAdd,0,1))
