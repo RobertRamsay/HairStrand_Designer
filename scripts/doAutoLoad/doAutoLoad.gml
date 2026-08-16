@@ -64,6 +64,26 @@ if canLoad
         tString=file_text_read_string(theFile); file_text_readln(theFile); tString=analiseString(tString);
         customTipCol=make_color_rgb(hex_to_dec(string_copy(tString,1,2)),hex_to_dec(string_copy(tString,3,2)),hex_to_dec(string_copy(tString,5,2)));
 
+        // These are the legacy/global colours.  Initialise every set from them;
+        // the optional V1.84 colour-override block later in the file can replace
+        // individual set values.  This keeps older project files compatible.
+        globalColVarA=customColVarA
+        globalColVarB=customColVarB
+        globalRootCol=customRootCol
+        globalTipCol=customTipCol
+        for (var _colourLoadSet=0;_colourLoadSet<maxSets;_colourLoadSet++)
+            {
+            setColVarA[_colourLoadSet]=globalColVarA
+            setColVarB[_colourLoadSet]=globalColVarB
+            setRootCol[_colourLoadSet]=globalRootCol
+            setTipCol[_colourLoadSet]=globalTipCol
+            setColVarAOverrode[_colourLoadSet]=0
+            setColVarBOverrode[_colourLoadSet]=0
+            setRootColOverrode[_colourLoadSet]=0
+            setTipColOverrode[_colourLoadSet]=0
+            }
+        setColourOverridesReady=1
+
         if bkCol_active==1   newColor=colrBack
         if ColA_active==1    newColor=customColVarA
         if ColB_active==1    newColor=customColVarB
@@ -230,7 +250,45 @@ if canLoad
                     tString=file_text_read_string(theFile); file_text_readln(theFile); setThickMaxAdj[set]=real(analiseString(tString));
                     }
                 }
+
+            // V1.84 - optional per-set colour overrides.  Older V1.84 files end
+            // after the thickness block, so only consume this section if present.
+            if !file_text_eof(theFile)
+                {
+                tString=file_text_read_string(theFile); file_text_readln(theFile);
+                if tString=="V1.84 - Per Set Colour Overrides"
+                    {
+                    for (set=0;set<11;set++)
+                        {
+                        tString=file_text_read_string(theFile); file_text_readln(theFile); setColVarAOverrode[set]=real(analiseString(tString));
+                        tString=file_text_read_string(theFile); file_text_readln(theFile); setColVarA[set]=real(analiseString(tString));
+                        tString=file_text_read_string(theFile); file_text_readln(theFile); setColVarBOverrode[set]=real(analiseString(tString));
+                        tString=file_text_read_string(theFile); file_text_readln(theFile); setColVarB[set]=real(analiseString(tString));
+                        tString=file_text_read_string(theFile); file_text_readln(theFile); setRootColOverrode[set]=real(analiseString(tString));
+                        tString=file_text_read_string(theFile); file_text_readln(theFile); setRootCol[set]=real(analiseString(tString));
+                        tString=file_text_read_string(theFile); file_text_readln(theFile); setTipColOverrode[set]=real(analiseString(tString));
+                        tString=file_text_read_string(theFile); file_text_readln(theFile); setTipCol[set]=real(analiseString(tString));
+                        }
+                    }
+                }
             }
+
+        // Loading always returns to global editing, so expose the loaded globals
+        // to the existing picker and synchronisation code.
+        customColVarA=globalColVarA
+        customColVarB=globalColVarB
+        customRootCol=globalRootCol
+        customTipCol=globalTipCol
+        colourUiLastA=customColVarA
+        colourUiLastB=customColVarB
+        colourUiLastRoot=customRootCol
+        colourUiLastTip=customTipCol
+        colourUiLastSet=setSelectedID
+        if bkCol_active==1   newColor=colrBack
+        if ColA_active==1    newColor=customColVarA
+        if ColB_active==1    newColor=customColVarB
+        if RootCol_active==1 newColor=customRootCol
+        if TipCol_active==1  newColor=customTipCol
 
         #endregion
 
