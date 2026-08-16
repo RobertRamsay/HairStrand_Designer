@@ -11,66 +11,76 @@ if variable_instance_exists(id,"v185ColourLoadNeedsRecovery") and v185ColourLoad
 	else if variable_instance_exists(id,"fileCustom") and fileCustom!="" and file_exists(fileCustom)
 		_colourLoadPath=fileCustom
 	
-	var _loadedVersion=0
-	var _versionPos=string_pos("Version",mainS)
-	if _versionPos>0 _loadedVersion=real(string_copy(mainS,_versionPos+7,4))
-	
 	var _foundColourBlock=0
+	var _loadedVersion=0
 	
-	if _colourLoadPath!="" and _loadedVersion>=1.85
+	if _colourLoadPath!=""
 		{
 		var _colourFile=file_text_open_read(_colourLoadPath)
 		if _colourFile!=-1
 			{
+			// Read compatibility from the file itself, never from mainS. The legacy
+			// loader may already have promoted mainS to the current build by now.
 			var _line=""
-			while !file_text_eof(_colourFile) and _foundColourBlock==0
+			if !file_text_eof(_colourFile)
 				{
-				_line=file_text_read_string(_colourFile)
+				var _fileHeader=file_text_read_string(_colourFile)
 				file_text_readln(_colourFile)
-				if _line=="V1.85 - Per Set Colour Overrides" _foundColourBlock=1
+				var _versionPos=string_pos("Version",_fileHeader)
+				if _versionPos>0 _loadedVersion=real(string_copy(_fileHeader,_versionPos+7,4))
 				}
 			
-			if _foundColourBlock==1 and !file_text_eof(_colourFile)
+			if _loadedVersion>=1.85
 				{
-				// Two 1.85 layouts have existed during development:
-				// 1) manual save: marker, four globals, then 11 set records
-				// 2) autosave:    marker, then 11 set records (globals are earlier)
-				// Accept both so no existing 1.85 work is stranded.
-				_line=file_text_read_string(_colourFile)
-				file_text_readln(_colourFile)
-				
-				var _firstSet=0
-				if string_pos("globalColVarA:",_line)==1
+				while !file_text_eof(_colourFile) and _foundColourBlock==0
 					{
-					globalColVarA=real(analiseString(_line))
-					_line=file_text_read_string(_colourFile); file_text_readln(_colourFile); globalColVarB=real(analiseString(_line))
-					_line=file_text_read_string(_colourFile); file_text_readln(_colourFile); globalRootCol=real(analiseString(_line))
-					_line=file_text_read_string(_colourFile); file_text_readln(_colourFile); globalTipCol=real(analiseString(_line))
-					}
-				else
-					{
-					// Old/current autosave layout: the first line already belongs to set 0.
-					setColVarAOverrode[0]=real(analiseString(_line))
-					_line=file_text_read_string(_colourFile); file_text_readln(_colourFile); setColVarA[0]=real(analiseString(_line))
-					_line=file_text_read_string(_colourFile); file_text_readln(_colourFile); setColVarBOverrode[0]=real(analiseString(_line))
-					_line=file_text_read_string(_colourFile); file_text_readln(_colourFile); setColVarB[0]=real(analiseString(_line))
-					_line=file_text_read_string(_colourFile); file_text_readln(_colourFile); setRootColOverrode[0]=real(analiseString(_line))
-					_line=file_text_read_string(_colourFile); file_text_readln(_colourFile); setRootCol[0]=real(analiseString(_line))
-					_line=file_text_read_string(_colourFile); file_text_readln(_colourFile); setTipColOverrode[0]=real(analiseString(_line))
-					_line=file_text_read_string(_colourFile); file_text_readln(_colourFile); setTipCol[0]=real(analiseString(_line))
-					_firstSet=1
+					_line=file_text_read_string(_colourFile)
+					file_text_readln(_colourFile)
+					if _line=="V1.85 - Per Set Colour Overrides" _foundColourBlock=1
 					}
 				
-				for (var _set=_firstSet;_set<11;_set++)
+				if _foundColourBlock==1 and !file_text_eof(_colourFile)
 					{
-					_line=file_text_read_string(_colourFile); file_text_readln(_colourFile); setColVarAOverrode[_set]=real(analiseString(_line))
-					_line=file_text_read_string(_colourFile); file_text_readln(_colourFile); setColVarA[_set]=real(analiseString(_line))
-					_line=file_text_read_string(_colourFile); file_text_readln(_colourFile); setColVarBOverrode[_set]=real(analiseString(_line))
-					_line=file_text_read_string(_colourFile); file_text_readln(_colourFile); setColVarB[_set]=real(analiseString(_line))
-					_line=file_text_read_string(_colourFile); file_text_readln(_colourFile); setRootColOverrode[_set]=real(analiseString(_line))
-					_line=file_text_read_string(_colourFile); file_text_readln(_colourFile); setRootCol[_set]=real(analiseString(_line))
-					_line=file_text_read_string(_colourFile); file_text_readln(_colourFile); setTipColOverrode[_set]=real(analiseString(_line))
-					_line=file_text_read_string(_colourFile); file_text_readln(_colourFile); setTipCol[_set]=real(analiseString(_line))
+					// Two 1.85 layouts have existed during development:
+					// 1) manual save: marker, four globals, then 11 set records
+					// 2) autosave:    marker, then 11 set records (globals are earlier)
+					// Accept both so no existing 1.85 work is stranded.
+					_line=file_text_read_string(_colourFile)
+					file_text_readln(_colourFile)
+					
+					var _firstSet=0
+					if string_pos("globalColVarA:",_line)==1
+						{
+						globalColVarA=real(analiseString(_line))
+						_line=file_text_read_string(_colourFile); file_text_readln(_colourFile); globalColVarB=real(analiseString(_line))
+						_line=file_text_read_string(_colourFile); file_text_readln(_colourFile); globalRootCol=real(analiseString(_line))
+						_line=file_text_read_string(_colourFile); file_text_readln(_colourFile); globalTipCol=real(analiseString(_line))
+						}
+					else
+						{
+						// Autosave layout: the first line already belongs to set 0.
+						setColVarAOverrode[0]=real(analiseString(_line))
+						_line=file_text_read_string(_colourFile); file_text_readln(_colourFile); setColVarA[0]=real(analiseString(_line))
+						_line=file_text_read_string(_colourFile); file_text_readln(_colourFile); setColVarBOverrode[0]=real(analiseString(_line))
+						_line=file_text_read_string(_colourFile); file_text_readln(_colourFile); setColVarB[0]=real(analiseString(_line))
+						_line=file_text_read_string(_colourFile); file_text_readln(_colourFile); setRootColOverrode[0]=real(analiseString(_line))
+						_line=file_text_read_string(_colourFile); file_text_readln(_colourFile); setRootCol[0]=real(analiseString(_line))
+						_line=file_text_read_string(_colourFile); file_text_readln(_colourFile); setTipColOverrode[0]=real(analiseString(_line))
+						_line=file_text_read_string(_colourFile); file_text_readln(_colourFile); setTipCol[0]=real(analiseString(_line))
+						_firstSet=1
+						}
+					
+					for (var _set=_firstSet;_set<11;_set++)
+						{
+						_line=file_text_read_string(_colourFile); file_text_readln(_colourFile); setColVarAOverrode[_set]=real(analiseString(_line))
+						_line=file_text_read_string(_colourFile); file_text_readln(_colourFile); setColVarA[_set]=real(analiseString(_line))
+						_line=file_text_read_string(_colourFile); file_text_readln(_colourFile); setColVarBOverrode[_set]=real(analiseString(_line))
+						_line=file_text_read_string(_colourFile); file_text_readln(_colourFile); setColVarB[_set]=real(analiseString(_line))
+						_line=file_text_read_string(_colourFile); file_text_readln(_colourFile); setRootColOverrode[_set]=real(analiseString(_line))
+						_line=file_text_read_string(_colourFile); file_text_readln(_colourFile); setRootCol[_set]=real(analiseString(_line))
+						_line=file_text_read_string(_colourFile); file_text_readln(_colourFile); setTipColOverrode[_set]=real(analiseString(_line))
+						_line=file_text_read_string(_colourFile); file_text_readln(_colourFile); setTipCol[_set]=real(analiseString(_line))
+						}
 					}
 				}
 			
