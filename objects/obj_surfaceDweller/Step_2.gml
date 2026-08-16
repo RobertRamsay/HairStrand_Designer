@@ -150,5 +150,30 @@ if TipCol_active==1
 			} 
 		}
 	}
-	
+
+// The final renderer still consumes the original custom colour variables.
+// Feed it the colour set for the batch currently being rendered, then restore
+// the UI-facing colours immediately afterwards.
+var _uiColVarA=customColVarA
+var _uiColVarB=customColVarB
+var _uiRootCol=customRootCol
+var _uiTipCol=customTipCol
+var _swapRenderColours=(renderF>=0 and renderF<11)
+
+if _swapRenderColours
+	{
+	customColVarA=setColVarA[renderF]
+	customColVarB=setColVarB[renderF]
+	customRootCol=setRootCol[renderF]
+	customTipCol=setTipCol[renderF]
+	}
+
 doMainStep()
+
+if _swapRenderColours
+	{
+	customColVarA=_uiColVarA
+	customColVarB=_uiColVarB
+	customRootCol=_uiRootCol
+	customTipCol=_uiTipCol
+	}
