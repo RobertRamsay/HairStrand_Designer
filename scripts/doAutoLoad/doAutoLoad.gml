@@ -64,9 +64,9 @@ if canLoad
         tString=file_text_read_string(theFile); file_text_readln(theFile); tString=analiseString(tString);
         customTipCol=make_color_rgb(hex_to_dec(string_copy(tString,1,2)),hex_to_dec(string_copy(tString,3,2)),hex_to_dec(string_copy(tString,5,2)));
 
-        // These are the legacy/global colours.  Initialise every set from them;
-        // the optional V1.84 colour-override block later in the file can replace
-        // individual set values.  This keeps older project files compatible.
+        // These are the legacy/global colours. Initialise every set from them;
+        // only a 1.85+ project may replace individual values from the optional
+        // per-set colour block later in the file.
         globalColVarA=customColVarA
         globalColVarB=customColVarB
         globalRootCol=customRootCol
@@ -251,12 +251,12 @@ if canLoad
                     }
                 }
 
-            // V1.84 - optional per-set colour overrides.  Older V1.84 files end
-            // after the thickness block, so only consume this section if present.
-            if !file_text_eof(theFile)
+            // V1.85 - per-set colour overrides. This data did not exist before
+            // project format 1.85, so both the header and section label must match.
+            if real(string_copy(mainS,46,4)) >= 1.85 and !file_text_eof(theFile)
                 {
                 tString=file_text_read_string(theFile); file_text_readln(theFile);
-                if tString=="V1.84 - Per Set Colour Overrides"
+                if tString=="V1.85 - Per Set Colour Overrides"
                     {
                     for (set=0;set<11;set++)
                         {
