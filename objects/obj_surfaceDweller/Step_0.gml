@@ -202,6 +202,74 @@ else
 	customTipCol=globalTipCol
 	}
 
+// -----------------------------------------------------------------------------
+// COLOUR SLOT SELECTION: CLICK ONLY
+// Draw_0 contains an old hover-driven selector. Keep an authoritative selection
+// here which only changes on a real left click. mainCalc() restores this state
+// after the old Draw hover block has run, before the colour UI is drawn/used.
+// Slot: 0=background, 1=A, 2=B, 3=root, 4=tip.
+// -----------------------------------------------------------------------------
+if !variable_instance_exists(id,"colourSelectedSlot")
+	{
+	if bkCol_active==1 colourSelectedSlot=0
+	else if ColA_active==1 colourSelectedSlot=1
+	else if ColB_active==1 colourSelectedSlot=2
+	else if RootCol_active==1 colourSelectedSlot=3
+	else if TipCol_active==1 colourSelectedSlot=4
+	else colourSelectedSlot=1
+	colourSelectedStoreColor=storeColor
+	}
+
+var _clickedColourSlot=-1
+if mouse_check_button_pressed(mb_left) and mouse_x>1568 and mouse_x<1632
+	{
+	if mouse_y>541 and mouse_y<564 _clickedColourSlot=0
+	if mouse_y>568 and mouse_y<590 _clickedColourSlot=1
+	if mouse_y>594 and mouse_y<618 _clickedColourSlot=2
+	if mouse_y>621 and mouse_y<645 _clickedColourSlot=3
+	if mouse_y>649 and mouse_y<671 _clickedColourSlot=4
+	}
+
+if _clickedColourSlot!=-1
+	{
+	colourSelectedSlot=_clickedColourSlot
+	if colourSelectedSlot==0 colourSelectedStoreColor=colrBack
+	if colourSelectedSlot==1 colourSelectedStoreColor=customColVarA
+	if colourSelectedSlot==2 colourSelectedStoreColor=customColVarB
+	if colourSelectedSlot==3 colourSelectedStoreColor=customRootCol
+	if colourSelectedSlot==4 colourSelectedStoreColor=customTipCol
+	}
+
+// If the user changes strand set while keeping the same colour channel active,
+// reset the old/new comparison source to that set's colour.
+if colourUiLastSet!=setSelectedID
+	{
+	if colourSelectedSlot==0 colourSelectedStoreColor=colrBack
+	if colourSelectedSlot==1 colourSelectedStoreColor=customColVarA
+	if colourSelectedSlot==2 colourSelectedStoreColor=customColVarB
+	if colourSelectedSlot==3 colourSelectedStoreColor=customRootCol
+	if colourSelectedSlot==4 colourSelectedStoreColor=customTipCol
+	}
+
+// Restore the authoritative active flags before End Step / picker interaction.
+bkCol_active=0
+ColA_active=0
+ColB_active=0
+RootCol_active=0
+TipCol_active=0
+if colourSelectedSlot==0 bkCol_active=1
+if colourSelectedSlot==1 ColA_active=1
+if colourSelectedSlot==2 ColB_active=1
+if colourSelectedSlot==3 RootCol_active=1
+if colourSelectedSlot==4 TipCol_active=1
+
+storeColor=colourSelectedStoreColor
+if colourSelectedSlot==0 newColor=colrBack
+if colourSelectedSlot==1 newColor=customColVarA
+if colourSelectedSlot==2 newColor=customColVarB
+if colourSelectedSlot==3 newColor=customRootCol
+if colourSelectedSlot==4 newColor=customTipCol
+
 // When switching between global/set editing, make the active colour picker
 // follow the newly exposed colour instead of retaining the previous set's value.
 if colourUiLastSet!=setSelectedID
