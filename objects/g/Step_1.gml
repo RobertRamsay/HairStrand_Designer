@@ -1,11 +1,24 @@
 // Begin Step runs before the legacy Key Press events.
-// Latch manual Save before KeyPress_83 forcibly releases S, and debounce
-// autosave from the actual per-set colour state rather than mouse timing.
+// Latch manual Save before KeyPress_83 forcibly releases S, debounce autosave
+// from the real per-set colour state, and own the startup autoload handoff.
 
 if instance_exists(obj_surfaceDweller)
     {
     with (obj_surfaceDweller)
         {
+        // The splash sets readyToCheckAutoloads=1 when the user enters the app.
+        // Consume that one-shot signal here so Autosave.txt is actually restored.
+        if readyToCheckAutoloads==1 and !variable_instance_exists(id,"v185StartupAutoloadHandled")
+            {
+            v185StartupAutoloadHandled=1
+            readyToCheckAutoloads=0
+
+            if autoloading==1 and file_exists("Autosave.txt")
+                {
+                doAutoLoad()
+                }
+            }
+
         // Manual project Save is handled by the old S-key event later this frame.
         // Make the format boundary explicit before that event writes the header,
         // then let Alarm 1 append the authoritative colour block next frame.
