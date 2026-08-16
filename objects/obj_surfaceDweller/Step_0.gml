@@ -35,6 +35,38 @@ if !variable_instance_exists(id,"setColourOverridesReady")
 	setColourOverridesReady=1
 	}
 
+// Per-set colour data did not exist before project format 1.85.
+// If an older project/autosave is loaded, deliberately ignore any accidental
+// trailing colour block and treat its four legacy colours as global-only.
+// Once converted in memory, future saves use the current 1.85 project header.
+var _colourProjectVersion=real(string_copy(mainS,46,4))
+if _colourProjectVersion<1.85 and !loading
+	{
+	globalColVarA=customColVarA
+	globalColVarB=customColVarB
+	globalRootCol=customRootCol
+	globalTipCol=customTipCol
+	
+	for (var _legacyColourSet=0;_legacyColourSet<maxSets;_legacyColourSet++)
+		{
+		setColVarA[_legacyColourSet]=globalColVarA
+		setColVarB[_legacyColourSet]=globalColVarB
+		setRootCol[_legacyColourSet]=globalRootCol
+		setTipCol[_legacyColourSet]=globalTipCol
+		setColVarAOverrode[_legacyColourSet]=0
+		setColVarBOverrode[_legacyColourSet]=0
+		setRootColOverrode[_legacyColourSet]=0
+		setTipColOverrode[_legacyColourSet]=0
+		}
+	
+	mainS="Hair Strand Designer - Project File - Version1.85.0 - 16thAug2026 (C) Robert Ramsay"
+	colourUiLastA=customColVarA
+	colourUiLastB=customColVarB
+	colourUiLastRoot=customRootCol
+	colourUiLastTip=customTipCol
+	colourUiLastSet=setSelectedID
+	}
+
 var _colourChanged=0
 
 // Variation A
