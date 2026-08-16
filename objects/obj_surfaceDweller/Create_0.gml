@@ -2,7 +2,7 @@ draw_set_color(c_white);
 
 demoMode=0 // for DEMO mode
 demoInfo="DEMO (no save options)"
-versionHSD="1.84.0.0"
+versionHSD="1.85.0.0"
 
 showHeart=0
 uiExtras=1 // little dots for overrides.
