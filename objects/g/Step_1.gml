@@ -13,6 +13,7 @@ if instance_exists(obj_surfaceDweller)
             {
             mainS="Hair Strand Designer - Project File - Version1.85.0 - 16thAug2026 (C) Robert Ramsay"
             v185ManualSavePending=1
+            v185ManualSavePath=""
             // Begin Step runs before Alarm processing, so use 2 to guarantee the
             // persistence alarm cannot run until after this frame's S-key event.
             alarm[1]=2
