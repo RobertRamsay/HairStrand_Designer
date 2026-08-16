@@ -186,3 +186,49 @@ colourUiLastB=customColVarB
 colourUiLastRoot=customRootCol
 colourUiLastTip=customTipCol
 colourUiLastSet=setSelectedID
+
+// -----------------------------------------------------------------------------
+// COLOUR HISTORY: ONLY COMMIT ON A REAL LEFT CLICK
+// The legacy Draw event's five colour swatch handlers run from mouse position
+// alone, so merely hovering currently writes hCol[] and advances the history.
+// Keep its normal click behaviour, but redirect hover-only writes to hCol[24],
+// which is outside the 24 visible history slots (0..23).
+// -----------------------------------------------------------------------------
+if !variable_instance_exists(id,"colourHistoryHoverSuppressed")
+	{
+	colourHistoryHoverSuppressed=0
+	colourHistorySavedPointer=colorHistoryPointer
+	}
+
+var _overColourSourceSwatch =
+	mouse_x>1568 and mouse_x<1632 and
+	(
+		(mouse_y>541 and mouse_y<564) or
+		(mouse_y>568 and mouse_y<590) or
+		(mouse_y>594 and mouse_y<618) or
+		(mouse_y>621 and mouse_y<645) or
+		(mouse_y>649 and mouse_y<671)
+	)
+
+if _overColourSourceSwatch and !mouse_check_button_pressed(mb_left)
+	{
+	if colourHistoryHoverSuppressed==0
+		{
+		colourHistorySavedPointer=colorHistoryPointer
+		colourHistoryHoverSuppressed=1
+		}
+	
+	// Draw_0 may write/increment/wrap this during hover. Reset it to the dummy
+	// slot every Step so no visible history entry is changed.
+	colorHistoryPointer=24
+	}
+else
+	{
+	if colourHistoryHoverSuppressed==1
+		{
+		// Restore the real insertion point before Draw_0 sees an actual click,
+		// or when the cursor leaves the colour-source swatches.
+		colorHistoryPointer=colourHistorySavedPointer
+		colourHistoryHoverSuppressed=0
+		}
+	}
