@@ -18,6 +18,12 @@ for (a=0;a<20;a++)
 	setSpacingOverrode[a]=0 // has this been overrode?
 	setVariOverrode[a]=0
 	strandYRanRangeOverrode[a]=0
+	
+	// per-set colour override flags
+	setColVarAOverrode[a]=0
+	setColVarBOverrode[a]=0
+	setRootColOverrode[a]=0
+	setTipColOverrode[a]=0
 
 	}
 	
