@@ -9,7 +9,7 @@ if instance_exists(obj_surfaceDweller)
         // Manual project Save is handled by the old S-key event later this frame.
         // Make the format boundary explicit before that event writes the header,
         // then let Alarm 1 append the authoritative colour block next frame.
-        if keyboard_check_pressed(ord("S")) and demoMode==0
+        if keyboard_check_pressed(ord("S")) and canSave and demoMode==0
             {
             mainS="Hair Strand Designer - Project File - Version1.85.0 - 16thAug2026 (C) Robert Ramsay"
             v185ManualSavePending=1
@@ -96,8 +96,11 @@ if instance_exists(obj_surfaceDweller)
                             v185SnapTipOver[_snapSet]=setTipColOverrode[_snapSet]
                             }
 
-                        v185AutosavePending=1
-                        alarm[1]=2
+                        if autosave==1 and demoMode==0
+                            {
+                            v185AutosavePending=1
+                            alarm[1]=2
+                            }
                         }
                     }
                 }
