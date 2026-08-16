@@ -11,9 +11,17 @@ if variable_instance_exists(id,"v185ManualSavePending") and v185ManualSavePendin
     {
     v185ManualSavePending=0
 
-    if fileCustom!="" and file_exists(fileCustom) and fileCustom!="Autosave.txt"
+    // Prefer the path captured at the start of End Step. The file-dialog mouse
+    // release may already have caused doAutoSave() to change fileCustom.
+    var _manualPath=""
+    if variable_instance_exists(id,"v185ManualSavePath") and v185ManualSavePath!="" and file_exists(v185ManualSavePath)
+        _manualPath=v185ManualSavePath
+    else if fileCustom!="" and fileCustom!="Autosave.txt" and file_exists(fileCustom)
+        _manualPath=fileCustom
+
+    if _manualPath!=""
         {
-        var _saveFile=file_text_open_append(fileCustom)
+        var _saveFile=file_text_open_append(_manualPath)
         if _saveFile!=-1
             {
             file_text_write_string(_saveFile,"V1.85 - Per Set Colour Overrides")
@@ -53,6 +61,8 @@ if variable_instance_exists(id,"v185ManualSavePending") and v185ManualSavePendin
             _manualSaveDone=1
             }
         }
+
+    v185ManualSavePath=""
     }
 
 // -----------------------------------------------------------------------------
