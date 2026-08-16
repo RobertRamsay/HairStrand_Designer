@@ -2,14 +2,13 @@
 // https://help.yoyogames.com/hc/en-us/articles/360005277377 for more information
 function clearOverrides(){
 
-// Manual load and autoload both call clearOverrides() after setting loading=true.
-// Schedule a one-frame-later authoritative V1.85 colour restore, after the legacy
-// loader has finished reading/closing the project file. Alarm 2 preserves its
-// original sound behaviour when this flag is not active.
+// Both manual load and autoload set loading=true before calling this function.
+// Alarm 1 performs the authoritative V1.85 colour restore on the next frame,
+// after the legacy loader has finished and closed the project file.
 if variable_instance_exists(id,"loading") and loading
 	{
-	v185ColourLoadNeedsRecovery=1
-	alarm[2]=1
+	v185LoadRecoveryPending=1
+	alarm[1]=1
 	}
 
 for (a=0;a<20;a++)
