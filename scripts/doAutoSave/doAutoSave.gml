@@ -37,10 +37,8 @@ if canSave and demoMode==0 and autosave==1
 // initial line
 			theFile = file_text_open_write(fileCustom);
 			
-		// Replace:
-file_text_write_string(theFile,string(mainS));
-// With:
-file_text_write_string(theFile,"Hair Strand Designer - Project File - Version1.84.0 - 25thFeb2026 (C) Robert Ramsay");
+// Autosaves are always written as the current project format.
+file_text_write_string(theFile,"Hair Strand Designer - Project File - Version1.85.0 - 16thAug2026 (C) Robert Ramsay");
 			file_text_writeln(theFile);
 			
 // instruction line			
@@ -447,9 +445,9 @@ var o=obj_surfaceDweller
 							file_text_writeln(theFile);	
 							}
 							
-							// V1.84 - per-set colour overrides.  Stored as native colour
+							// V1.85 - per-set colour overrides. Stored as native colour
 							// integers so save/load is lossless and simple.
-							file_text_write_string(theFile,"V1.84 - Per Set Colour Overrides");
+							file_text_write_string(theFile,"V1.85 - Per Set Colour Overrides");
 							file_text_writeln(theFile);
 							for (set=0;set<11;set++)
 								{
@@ -544,7 +542,7 @@ var o=obj_surfaceDweller
 		{
 		
 				var file5;
-		file5 = get_save_filename("MaskMap|*.png", "MASK_");
+		file5 = get_save_filename("MaskMap|*.png", "Mask_");
 		
 
 			if file5 != ""
