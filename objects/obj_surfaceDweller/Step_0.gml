@@ -264,3 +264,16 @@ else
 		colourHistoryHoverSuppressed=0
 		}
 	}
+
+// -----------------------------------------------------------------------------
+// TEXTURE VIEWER BOX DRAG
+// Draw_0 still draws the map viewer from xxx/yyy, but its original assignments
+// are commented out. Restore the intended behaviour here without rewriting the
+// large Draw event: drag anywhere inside the 1024x1024 map preview to move the
+// 512x512 source window over the 4096x4096 generated texture.
+// -----------------------------------------------------------------------------
+if img!=9 and mouse_check_button(mb_left) and mouse_x>=0 and mouse_x<1024 and mouse_y>=0 and mouse_y<1024 and !generating
+	{
+	xxx=clamp((mouse_x*4)-256,0,4096-512)
+	yyy=clamp((mouse_y*4)-256,0,4096-512)
+	}
