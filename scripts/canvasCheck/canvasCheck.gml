@@ -110,4 +110,171 @@ function canvasCheck(){
 		//previewCanvasComplete = 0
 	}
 
+	// -------------------------------------------------------------------------
+	// V1.85 MANUAL PROJECT COLOUR PERSISTENCE
+	//
+	// The legacy S/L key events explicitly call keyboard_key_release() before
+	// End Step.  Therefore the old Step_2 code that waited for *_pressed could
+	// miss the operation entirely.  canvasCheck() runs at the start of End Step,
+	// so use the forced release as the reliable "project IO has finished" signal.
+	// -------------------------------------------------------------------------
+
+	// Manual SAVE: the normal project file has already been written and closed.
+	// Append an authoritative block containing true globals plus every set value.
+	if keyboard_check_released(ord("S")) and fileCustom!="" and file_exists(fileCustom) and !autosaving
+		{
+		var _colourSaveFile=file_text_open_append(fileCustom)
+		if _colourSaveFile!=-1
+			{
+			file_text_write_string(_colourSaveFile,"V1.85 - Per Set Colour Overrides")
+			file_text_writeln(_colourSaveFile)
+
+			file_text_write_string(_colourSaveFile,"globalColVarA:"+string(globalColVarA)+";")
+			file_text_writeln(_colourSaveFile)
+			file_text_write_string(_colourSaveFile,"globalColVarB:"+string(globalColVarB)+";")
+			file_text_writeln(_colourSaveFile)
+			file_text_write_string(_colourSaveFile,"globalRootCol:"+string(globalRootCol)+";")
+			file_text_writeln(_colourSaveFile)
+			file_text_write_string(_colourSaveFile,"globalTipCol:"+string(globalTipCol)+";")
+			file_text_writeln(_colourSaveFile)
+
+			for (var _colourSaveSet=0;_colourSaveSet<11;_colourSaveSet++)
+				{
+				file_text_write_string(_colourSaveFile,"setColVarAOverrode["+string(_colourSaveSet)+"]:"+string(setColVarAOverrode[_colourSaveSet])+";")
+				file_text_writeln(_colourSaveFile)
+				file_text_write_string(_colourSaveFile,"setColVarA["+string(_colourSaveSet)+"]:"+string(setColVarA[_colourSaveSet])+";")
+				file_text_writeln(_colourSaveFile)
+				file_text_write_string(_colourSaveFile,"setColVarBOverrode["+string(_colourSaveSet)+"]:"+string(setColVarBOverrode[_colourSaveSet])+";")
+				file_text_writeln(_colourSaveFile)
+				file_text_write_string(_colourSaveFile,"setColVarB["+string(_colourSaveSet)+"]:"+string(setColVarB[_colourSaveSet])+";")
+				file_text_writeln(_colourSaveFile)
+				file_text_write_string(_colourSaveFile,"setRootColOverrode["+string(_colourSaveSet)+"]:"+string(setRootColOverrode[_colourSaveSet])+";")
+				file_text_writeln(_colourSaveFile)
+				file_text_write_string(_colourSaveFile,"setRootCol["+string(_colourSaveSet)+"]:"+string(setRootCol[_colourSaveSet])+";")
+				file_text_writeln(_colourSaveFile)
+				file_text_write_string(_colourSaveFile,"setTipColOverrode["+string(_colourSaveSet)+"]:"+string(setTipColOverrode[_colourSaveSet])+";")
+				file_text_writeln(_colourSaveFile)
+				file_text_write_string(_colourSaveFile,"setTipCol["+string(_colourSaveSet)+"]:"+string(setTipCol[_colourSaveSet])+";")
+				file_text_writeln(_colourSaveFile)
+				}
+
+			file_text_close(_colourSaveFile)
+			}
+		}
+
+	// Manual LOAD: legacy loader has finished, closed the file, and loaded mainS.
+	if keyboard_check_released(ord("L")) and fileCustom!="" and file_exists(fileCustom)
+		{
+		// Parse version by label rather than a fixed character offset. This stays
+		// safe if the project/header name changes again.
+		var _versionPos=string_pos("Version",mainS)
+		var _loadedProjectVersion=0
+		if _versionPos>0 _loadedProjectVersion=real(string_copy(mainS,_versionPos+7,4))
+
+		var _colourReadFile=file_text_open_read(fileCustom)
+		var _foundColourBlock=0
+		var _colourLine=""
+
+		if _colourReadFile!=-1 and _loadedProjectVersion>=1.85
+			{
+			while !file_text_eof(_colourReadFile) and _foundColourBlock==0
+				{
+				_colourLine=file_text_read_string(_colourReadFile)
+				file_text_readln(_colourReadFile)
+				if _colourLine=="V1.85 - Per Set Colour Overrides" _foundColourBlock=1
+				}
+
+			if _foundColourBlock==1
+				{
+				_colourLine=file_text_read_string(_colourReadFile); file_text_readln(_colourReadFile); globalColVarA=real(analiseString(_colourLine))
+				_colourLine=file_text_read_string(_colourReadFile); file_text_readln(_colourReadFile); globalColVarB=real(analiseString(_colourLine))
+				_colourLine=file_text_read_string(_colourReadFile); file_text_readln(_colourReadFile); globalRootCol=real(analiseString(_colourLine))
+				_colourLine=file_text_read_string(_colourReadFile); file_text_readln(_colourReadFile); globalTipCol=real(analiseString(_colourLine))
+
+				for (var _colourLoadSet=0;_colourLoadSet<11;_colourLoadSet++)
+					{
+					_colourLine=file_text_read_string(_colourReadFile); file_text_readln(_colourReadFile); setColVarAOverrode[_colourLoadSet]=real(analiseString(_colourLine))
+					_colourLine=file_text_read_string(_colourReadFile); file_text_readln(_colourReadFile); setColVarA[_colourLoadSet]=real(analiseString(_colourLine))
+					_colourLine=file_text_read_string(_colourReadFile); file_text_readln(_colourReadFile); setColVarBOverrode[_colourLoadSet]=real(analiseString(_colourLine))
+					_colourLine=file_text_read_string(_colourReadFile); file_text_readln(_colourReadFile); setColVarB[_colourLoadSet]=real(analiseString(_colourLine))
+					_colourLine=file_text_read_string(_colourReadFile); file_text_readln(_colourReadFile); setRootColOverrode[_colourLoadSet]=real(analiseString(_colourLine))
+					_colourLine=file_text_read_string(_colourReadFile); file_text_readln(_colourReadFile); setRootCol[_colourLoadSet]=real(analiseString(_colourLine))
+					_colourLine=file_text_read_string(_colourReadFile); file_text_readln(_colourReadFile); setTipColOverrode[_colourLoadSet]=real(analiseString(_colourLine))
+					_colourLine=file_text_read_string(_colourReadFile); file_text_readln(_colourReadFile); setTipCol[_colourLoadSet]=real(analiseString(_colourLine))
+					}
+				}
+			}
+
+		if _colourReadFile!=-1 file_text_close(_colourReadFile)
+
+		// Legacy project, or a 1.85 project saved before the colour block existed:
+		// use its normal four colours globally and clear only colour override flags.
+		if _foundColourBlock==0
+			{
+			globalColVarA=customColVarA
+			globalColVarB=customColVarB
+			globalRootCol=customRootCol
+			globalTipCol=customTipCol
+
+			for (var _legacyColourSet=0;_legacyColourSet<maxSets;_legacyColourSet++)
+				{
+				setColVarA[_legacyColourSet]=globalColVarA
+				setColVarB[_legacyColourSet]=globalColVarB
+				setRootCol[_legacyColourSet]=globalRootCol
+				setTipCol[_legacyColourSet]=globalTipCol
+				setColVarAOverrode[_legacyColourSet]=0
+				setColVarBOverrode[_legacyColourSet]=0
+				setRootColOverrode[_legacyColourSet]=0
+				setTipColOverrode[_legacyColourSet]=0
+				}
+			}
+
+		for (var _extraColourSet=11;_extraColourSet<maxSets;_extraColourSet++)
+			{
+			setColVarA[_extraColourSet]=globalColVarA
+			setColVarB[_extraColourSet]=globalColVarB
+			setRootCol[_extraColourSet]=globalRootCol
+			setTipCol[_extraColourSet]=globalTipCol
+			setColVarAOverrode[_extraColourSet]=0
+			setColVarBOverrode[_extraColourSet]=0
+			setRootColOverrode[_extraColourSet]=0
+			setTipColOverrode[_extraColourSet]=0
+			}
+
+		setColourOverridesReady=1
+		customColVarA=globalColVarA
+		customColVarB=globalColVarB
+		customRootCol=globalRootCol
+		customTipCol=globalTipCol
+		colourUiLastA=customColVarA
+		colourUiLastB=customColVarB
+		colourUiLastRoot=customRootCol
+		colourUiLastTip=customTipCol
+		colourUiLastSet=setSelectedID
+
+		// Keep the newer click-only colour selector in sync with the loaded data.
+		if variable_instance_exists(id,"colourSelectedSlot")
+			{
+			if colourSelectedSlot==0 colourSelectedStoreColor=colrBack
+			if colourSelectedSlot==1 colourSelectedStoreColor=customColVarA
+			if colourSelectedSlot==2 colourSelectedStoreColor=customColVarB
+			if colourSelectedSlot==3 colourSelectedStoreColor=customRootCol
+			if colourSelectedSlot==4 colourSelectedStoreColor=customTipCol
+			}
+
+		if bkCol_active==1   newColor=colrBack
+		if ColA_active==1    newColor=customColVarA
+		if ColB_active==1    newColor=customColVarB
+		if RootCol_active==1 newColor=customRootCol
+		if TipCol_active==1  newColor=customTipCol
+
+		colorOnlyUpdate=1
+		previewCanvasComplete=0
+		forceUpdate=1
+
+		// Compatibility has been resolved. Future saves from this running build
+		// are always current-format 1.85 files.
+		mainS="Hair Strand Designer - Project File - Version1.85.0 - 16thAug2026 (C) Robert Ramsay"
+		}
+
 }
