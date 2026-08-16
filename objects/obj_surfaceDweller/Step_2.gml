@@ -195,33 +195,6 @@ if bkCol_active==1
 if mouse_check_button_released(mb_left)
 	{
 		doAutoSave()
-		
-		// doAutoSave still writes the legacy header text internally. Promote the
-		// finished autosave to project format 1.85 without disturbing its body.
-		if autosave==1 and canSave and demoMode==0 and file_exists("Autosave.txt")
-			{
-			var _v185AutoTmp="Autosave_v185.tmp"
-			if file_exists(_v185AutoTmp) file_delete(_v185AutoTmp)
-			var _v185AutoIn=file_text_open_read("Autosave.txt")
-			var _v185AutoOut=file_text_open_write(_v185AutoTmp)
-			var _v185AutoFirst=1
-			while !file_text_eof(_v185AutoIn)
-				{
-				var _v185AutoLine=file_text_read_string(_v185AutoIn)
-				file_text_readln(_v185AutoIn)
-				if _v185AutoFirst==1
-					{
-					file_text_write_string(_v185AutoOut,"Hair Strand Designer - Project File - Version1.85.0 - 16thAug2026 (C) Robert Ramsay")
-					_v185AutoFirst=0
-					}
-				else file_text_write_string(_v185AutoOut,_v185AutoLine)
-				file_text_writeln(_v185AutoOut)
-				}
-			file_text_close(_v185AutoIn)
-			file_text_close(_v185AutoOut)
-			file_delete("Autosave.txt")
-			file_rename(_v185AutoTmp,"Autosave.txt")
-			}
 	}
 
 
