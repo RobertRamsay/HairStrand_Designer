@@ -88,11 +88,11 @@ or (img==9 and seedUpdate==1))
                 var _tMax=t_maxScale*_padFactor
                 var _tMax2=_tMax*2
 
-                // Pre-extract colour channels once per strand
-                var _cRvA=color_get_red(customColVarA);   var _cGvA=color_get_green(customColVarA);  var _cBvA=color_get_blue(customColVarA)
-                var _cRvB=color_get_red(customColVarB);   var _cGvB=color_get_green(customColVarB);  var _cBvB=color_get_blue(customColVarB)
-                var _cRroot=color_get_red(customRootCol); var _cGroot=color_get_green(customRootCol);var _cBroot=color_get_blue(customRootCol)
-                var _cRtip=color_get_red(customTipCol);   var _cGtip=color_get_green(customTipCol);  var _cBtip=color_get_blue(customTipCol)
+                // Pre-extract this set's colour channels once per strand
+                var _cRvA=color_get_red(setColVarA[b]);   var _cGvA=color_get_green(setColVarA[b]);  var _cBvA=color_get_blue(setColVarA[b])
+                var _cRvB=color_get_red(setColVarB[b]);   var _cGvB=color_get_green(setColVarB[b]);  var _cBvB=color_get_blue(setColVarB[b])
+                var _cRroot=color_get_red(setRootCol[b]); var _cGroot=color_get_green(setRootCol[b]);var _cBroot=color_get_blue(setRootCol[b])
+                var _cRtip=color_get_red(setTipCol[b]);   var _cGtip=color_get_green(setTipCol[b]);  var _cBtip=color_get_blue(setTipCol[b])
 
                 // Pre-compute per-strand LUT index strides
                 // thickness: dsin(n/life*90)  -> lut_sin[round(n/life*360) mod 1440]
@@ -258,18 +258,18 @@ if (img==9 and mouse_x<1024 and mouse_check_button(mb_left)) or mouse_check_butt
                         var algTaper=lerp(algFinalX,setXpos,(n/life)*(clamp(strandSetTaperAdj[b],1,strandSetTaperAdj[b])*0.01))
                         finalX=algTaper
 
-                        // Colour — original per-point extraction (realtime mode, less perf critical)
-                        var tempRv=lerp(color_get_red(customColVarA),color_get_red(customColVarB),clamp(dpth+dpthAdd,0,1))
-                        var tempGv=lerp(color_get_green(customColVarA),color_get_green(customColVarB),clamp(dpth+dpthAdd,0,1))
-                        var tempBv=lerp(color_get_blue(customColVarA),color_get_blue(customColVarB),clamp(dpth+dpthAdd,0,1))
+                        // Colour — this selected set's override values
+                        var tempRv=lerp(color_get_red(setColVarA[b]),color_get_red(setColVarB[b]),clamp(dpth+dpthAdd,0,1))
+                        var tempGv=lerp(color_get_green(setColVarA[b]),color_get_green(setColVarB[b]),clamp(dpth+dpthAdd,0,1))
+                        var tempBv=lerp(color_get_blue(setColVarA[b]),color_get_blue(setColVarB[b]),clamp(dpth+dpthAdd,0,1))
                         var tempCol=make_color_rgb(tempRv,tempGv,tempBv)
-                        var tempRr=lerp(color_get_red(tempCol),color_get_red(customRootCol),rt)
-                        var tempGr=lerp(color_get_green(tempCol),color_get_green(customRootCol),rt)
-                        var tempBr=lerp(color_get_blue(tempCol),color_get_blue(customRootCol),rt)
+                        var tempRr=lerp(color_get_red(tempCol),color_get_red(setRootCol[b]),rt)
+                        var tempGr=lerp(color_get_green(tempCol),color_get_green(setRootCol[b]),rt)
+                        var tempBr=lerp(color_get_blue(tempCol),color_get_blue(setRootCol[b]),rt)
                         tempCol=make_color_rgb(tempRr,tempGr,tempBr)
-                        var tempRt=lerp(color_get_red(tempCol),color_get_red(customTipCol),tp)
-                        var tempGt=lerp(color_get_green(tempCol),color_get_green(customTipCol),tp)
-                        var tempBt=lerp(color_get_blue(tempCol),color_get_blue(customTipCol),tp)
+                        var tempRt=lerp(color_get_red(tempCol),color_get_red(setTipCol[b]),tp)
+                        var tempGt=lerp(color_get_green(tempCol),color_get_green(setTipCol[b]),tp)
+                        var tempBt=lerp(color_get_blue(tempCol),color_get_blue(setTipCol[b]),tp)
                         colrCustom=make_color_rgb(tempRt,tempGt,tempBt)
 
                         draw_set_color(colrCustom)
