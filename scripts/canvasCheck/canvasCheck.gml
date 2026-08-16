@@ -8,6 +8,15 @@ function canvasCheck(){
 
 	var _surfaceLost = false
 
+	// The legacy S-key event has finished by End Step, but a mouse release from
+	// the file dialog can trigger doAutoSave() later in Step_2 and replace
+	// fileCustom with Autosave.txt. Preserve the chosen project path first.
+	if variable_instance_exists(id,"v185ManualSavePending") and v185ManualSavePending==1
+		{
+		if fileCustom!="" and fileCustom!="Autosave.txt" and file_exists(fileCustom)
+			v185ManualSavePath=fileCustom
+		}
+
 	// Check and individually recreate each lost surface
 	if !surface_exists(canvas) {
 		canvas = surface_create(surfSize, surfSize)
