@@ -117,16 +117,18 @@ var o=obj_surfaceDweller
 			file_text_write_string(theFile,"Background Color (HEX):"+string(dec_to_hex_save(o.colrBack))+";"); 
 			file_text_writeln(theFile);
 			
-			file_text_write_string(theFile,"Variation Tone 1 (HEX):"+string(dec_to_hex_save(o.customColVarA))+";"); 
+			// Save the true global colours. custom* may be temporarily showing a
+			// selected/rendering set while the rest of the legacy code is running.
+			file_text_write_string(theFile,"Variation Tone 1 (HEX):"+string(dec_to_hex_save(o.globalColVarA))+";"); 
 			file_text_writeln(theFile);
 			
-			file_text_write_string(theFile,"Variation Tone 2 (HEX):"+string(dec_to_hex_save(o.customColVarB))+";"); 
+			file_text_write_string(theFile,"Variation Tone 2 (HEX):"+string(dec_to_hex_save(o.globalColVarB))+";"); 
 			file_text_writeln(theFile);
 			
-			file_text_write_string(theFile,"Root Color (HEX):"+string(dec_to_hex_save(o.customRootCol))+";"); 
+			file_text_write_string(theFile,"Root Color (HEX):"+string(dec_to_hex_save(o.globalRootCol))+";"); 
 			file_text_writeln(theFile);
 			
-			file_text_write_string(theFile,"Tip Color (HEX):"+string(dec_to_hex_save(o.customTipCol))+";"); 
+			file_text_write_string(theFile,"Tip Color (HEX):"+string(dec_to_hex_save(o.globalTipCol))+";"); 
 			file_text_writeln(theFile);
 			
 			var sets = 11
@@ -444,6 +446,30 @@ var o=obj_surfaceDweller
 							file_text_write_string(theFile,"setThickMaxAdj["+string(set)+"]:"+string(o.setThickMaxAdj[set])+";"); 
 							file_text_writeln(theFile);	
 							}
+							
+							// V1.84 - per-set colour overrides.  Stored as native colour
+							// integers so save/load is lossless and simple.
+							file_text_write_string(theFile,"V1.84 - Per Set Colour Overrides");
+							file_text_writeln(theFile);
+							for (set=0;set<11;set++)
+								{
+								file_text_write_string(theFile,"setColVarAOverrode["+string(set)+"]:"+string(o.setColVarAOverrode[set])+";");
+								file_text_writeln(theFile);
+								file_text_write_string(theFile,"setColVarA["+string(set)+"]:"+string(o.setColVarA[set])+";");
+								file_text_writeln(theFile);
+								file_text_write_string(theFile,"setColVarBOverrode["+string(set)+"]:"+string(o.setColVarBOverrode[set])+";");
+								file_text_writeln(theFile);
+								file_text_write_string(theFile,"setColVarB["+string(set)+"]:"+string(o.setColVarB[set])+";");
+								file_text_writeln(theFile);
+								file_text_write_string(theFile,"setRootColOverrode["+string(set)+"]:"+string(o.setRootColOverrode[set])+";");
+								file_text_writeln(theFile);
+								file_text_write_string(theFile,"setRootCol["+string(set)+"]:"+string(o.setRootCol[set])+";");
+								file_text_writeln(theFile);
+								file_text_write_string(theFile,"setTipColOverrode["+string(set)+"]:"+string(o.setTipColOverrode[set])+";");
+								file_text_writeln(theFile);
+								file_text_write_string(theFile,"setTipCol["+string(set)+"]:"+string(o.setTipCol[set])+";");
+								file_text_writeln(theFile);
+								}
 										
 								
 				}
@@ -492,7 +518,7 @@ var o=obj_surfaceDweller
 		{
 			
 			var file3;
-			file3 = get_save_filename("IDMap|*.png", "ID_");
+		file3 = get_save_filename("IDMap|*.png", "ID_");
 		
 		if file3 != ""
 			{
