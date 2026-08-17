@@ -1,4 +1,4 @@
-/*
+
 draw_text(x,y," COPY  PASTE ")
 
 if mouse_x>x-20 and mouse_x<x+10 and mouse_y>y-20 and mouse_y<y
